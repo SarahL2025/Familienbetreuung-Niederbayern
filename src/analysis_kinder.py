@@ -1,22 +1,21 @@
-# analyse_kinder
-import pandas as pd
-import matplotlib as plt
-import os
+import pandas as pd 
+import matplotlib.pyplot as plt
 
-#CSV-Datei einlesen
-data_path = "data/kinder_0_6.csv" 
-kinder = pd.read_csv(data_path)
 
-#Überprüfen der Daten
-print("Erste Zeile der CSV:")
-print(kinder.head())
+#CSV einlesen
+df = pd.read_csv("C:/Users/sarah/Documents/SDC 3 Semester/Datenvisualisierung/Familienbetreuung-Niederbayern/data/kinder_0_6.csv",sep=";", decimal=",", skiprows=[1])
 
-#Diagramm 
-plt.figure(figsize=(10,6))
+#Jahre als Spalten
+jahre = [str(j) for j in range (2003, 2024)]
 
-#Prügen, ob `Landkreis`und `Jahr`existieren
-if "Landkreis" not in kinder.columns or "Jahr" not in kinder.columns or "Kinder_0_6" not in kinder.columns:
-    raise ValueError("CSV muss die Spalten 'Landkreis', 'Jahr' und 'Kinder_0_6' enthalten!")
+#Diagramm erstellen
+df.set_index('Raumeinheit')[jahre].plot(kind='bar', stacked=True, figsize=(14,7), colormap='tab20')
 
-#Liniendiagramm 
-for landkreis in kinder ["Landkreis"]
+plt.ylabel('Anzahl der Kinder')
+plt.title('Altersstruktur der Kinder 0-6 Jahre in Niederbayern')
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
+
+#Diagramm speichern
+plt.savefig
+plt.show("C:/Users/sarah/Documents/SDC 3 Semester/Datenvisualisierung/Familienbetreuung-Niederbayern/diagrams")
