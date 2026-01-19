@@ -37,3 +37,12 @@ python -m venv .venv
 source .venv/bin/activate
 
 pip install -r requirements.txt
+```
+## Nutzung
+1. Python sowie die Bibliotheken **pandas**, **matplotlib** und **seaborn** installieren  
+2. CSV-Dateien unverändert im Ordner `data/` belassen  
+3. Analyse starten:
+
+```bash
+python src/analysis_kinder.py
+
