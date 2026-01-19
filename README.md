@@ -37,6 +37,7 @@ python -m venv .venv
 source .venv/bin/activate
 
 pip install -r requirements.txt
+
 ```
 ## Nutzung
 1. Python sowie die Bibliotheken **pandas**, **matplotlib** und **seaborn** installieren  
