@@ -17,6 +17,20 @@ Enthalten sind:
 - `Geborene.csv` (Geborene; Jahre 2003–2023)
 - `kinder_0_6.csv` (Einwohner unter 6 Jahre; Jahre 2003–2023)
 
+## 📊 Datenvisualisierungen
+
+### Einwohner unter 6 Jahre in Niederbayern (2003–2023)
+![Einwohner unter 6 Jahre](plot_kinder_0_6.png)
+
+### Betreuungsquote Kleinkinder in Niederbayern (2003–2023)
+![Betreuungsquote Kleinkinder](plot_kinderbetreuung.png)
+
+### Geborene in Niederbayern (2003–2023)
+![Geborene](plot_geborene.png)
+
+### Beschäftigtenquote Frauen in Niederbayern (2003–2023)
+![Beschäftigtenquote Frauen](plot_erwerbstaetige_frauen.png)
+
 ## Ordnerstruktur
 - `data/` – Rohdaten (CSV)
 - `src/` – Python-Code (Auswertung & Visualisierung)
@@ -37,13 +51,3 @@ python -m venv .venv
 source .venv/bin/activate
 
 pip install -r requirements.txt
-
-```
-## Nutzung
-1. Python sowie die Bibliotheken **pandas**, **matplotlib** und **seaborn** installieren  
-2. CSV-Dateien unverändert im Ordner `data/` belassen  
-3. Analyse starten:
-
-```bash
-python src/analysis_kinder.py
-
