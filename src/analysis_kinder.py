@@ -16,6 +16,10 @@ FILES = {
     "Erwerbstätige_Frauen": os.path.join(DATA_DIR, "Erwerbstätige Frauen.csv"),
 }
 
+YEAR_START = 2003
+YEAR_END = 2023
+
+
 # =========================
 # INKAR CSV einlesen (Jahre sind in der ersten Datenzeile)
 # =========================
@@ -53,27 +57,59 @@ def read_inkar_table(path: str) -> pd.DataFrame:
     long_df["Wert"] = pd.to_numeric(long_df["Wert"], errors="coerce")
 
     long_df = long_df.dropna(subset=["Jahr"]).sort_values(["Raumeinheit", "Jahr"]).reset_index(drop=True)
+
+    # Auf gewünschten Zeitraum begrenzen
+    long_df = long_df[(long_df["Jahr"] >= YEAR_START) & (long_df["Jahr"] <= YEAR_END)].copy()
+
     return long_df
 
+
 # =========================
-# Plot
+# Helfer: Top 3 / Bottom 3 nach letztem verfügbaren Jahr je Region
 # =========================
-def plot_lines(long_df: pd.DataFrame, title: str, y_label: str, out_name: str):
+def select_top_bottom_regions(piv: pd.DataFrame, top_n: int = 3, bottom_n: int = 3) -> pd.DataFrame:
+    # letztes verfügbares (nicht-NaN) Jahr je Region
+    last_vals = piv.apply(lambda col: col.dropna().iloc[-1] if col.dropna().shape[0] > 0 else pd.NA)
+    last_vals = last_vals.dropna().astype(float)
+
+    if last_vals.empty:
+        return piv  # fallback
+
+    top_regions = last_vals.sort_values(ascending=False).head(top_n).index.tolist()
+    bottom_regions = last_vals.sort_values(ascending=True).head(bottom_n).index.tolist()
+
+    # Reihenfolge: erst Top, dann Bottom (ohne Duplikate)
+    regions = []
+    for r in top_regions + bottom_regions:
+        if r not in regions:
+            regions.append(r)
+
+    return piv[regions]
+
+
+# =========================
+# Plot (nur Top 3 + Bottom 3) + Jahre 2003–2023
+# =========================
+def plot_lines_top_bottom(long_df: pd.DataFrame, title: str, y_label: str, out_name: str):
     piv = long_df.pivot_table(index="Jahr", columns="Raumeinheit", values="Wert", aggfunc="first").sort_index()
 
-    fig, ax = plt.subplots(figsize=(14, 7))
-    piv.plot(ax=ax, linewidth=2)
+    # Jahre 2003–2023 immer vollständig anzeigen
+    full_years = list(range(YEAR_START, YEAR_END + 1))
+    piv = piv.reindex(full_years)
 
-    ax.set_title(title, pad=12)
+    # Auswahl: Top 3 / Bottom 3
+    piv_sel = select_top_bottom_regions(piv, top_n=3, bottom_n=3)
+
+    fig, ax = plt.subplots(figsize=(14, 7))
+    piv_sel.plot(ax=ax, linewidth=2)
+
+    ax.set_title(f"{title}\n(Top 3 höchste & Top 3 niedrigste – nach letztem verfügbaren Jahr)", pad=12)
     ax.set_xlabel("Jahr")
     ax.set_ylabel(y_label)
 
-    years = piv.index.dropna().astype(int).tolist()
-    if years:
-        step = 2
-        xticks = years[::step]
-        ax.set_xticks(xticks)
-        ax.set_xticklabels([str(y) for y in xticks], rotation=45, ha="right")
+    # Alle Jahre anzeigen
+    ax.set_xticks(full_years)
+    ax.set_xticklabels([str(y) for y in full_years], rotation=45, ha="right")
 
     ax.grid(True, linewidth=0.6, alpha=0.35)
     ax.legend(title="Landkreis / Region", loc="center left", bbox_to_anchor=(1.02, 0.5), frameon=False)
@@ -82,21 +118,48 @@ def plot_lines(long_df: pd.DataFrame, title: str, y_label: str, out_name: str):
     plt.savefig(os.path.join(PROJECT_ROOT, out_name), dpi=200, bbox_inches="tight")
     plt.show()
 
+
 # =========================
-# Hauptteil
+# Hauptteil (4 Diagramme)
 # =========================
 def main():
+    # 1) Einwohner unter 6 Jahre (Anteil in %)
     df_kinder = read_inkar_table(FILES["Kinder_0_6"])
-    plot_lines(df_kinder, "Einwohner unter 6 Jahre in Niederbayern (2003–2023)", "Einwohner unter 6 Jahre", "plot_kinder_0_6.png")
+    plot_lines_top_bottom(
+        df_kinder,
+        "Einwohner unter 6 Jahre in Niederbayern (2003–2023)",
+        "Anteil der Einwohner unter 6 Jahren an den Einwohnern (%)",
+        "plot_kinder_0_6.png",
+    )
 
+    # 2) Betreuungsquote Kleinkinder (U3 in Kitas)
     df_betreuung = read_inkar_table(FILES["Kinderbetreuung"])
-    plot_lines(df_betreuung, "Betreuungsquote Kleinkinder in Niederbayern (2003–2023)", "Betreuungsquote (%)", "plot_kinderbetreuung.png")
+    plot_lines_top_bottom(
+        df_betreuung,
+        "Betreuungsquote Kleinkinder in Niederbayern (2003–2023)",
+        "Betreuungsquote Kleinkinder (Anteil U3 in Kindertageseinrichtungen, %)",
+        "plot_kinderbetreuung.png",
+    )
 
+    # 3) Geborene (je 1.000 Einwohner)
     df_geborene = read_inkar_table(FILES["Geborene"])
-    plot_lines(df_geborene, "Geborene in Niederbayern (2003–2023)", "Geborene", "plot_geborene.png")
+    plot_lines_top_bottom(
+        df_geborene,
+        "Geborene in Niederbayern (2003–2023)",
+        "Geborene (je 1.000 Einwohner)",
+        "plot_geborene.png",
+    )
 
+    # 4) Beschäftigte Frauen am Wohnort (je 100 Frauen im erwerbsfähigen Alter, %)
     df_frauen = read_inkar_table(FILES["Erwerbstätige_Frauen"])
-    plot_lines(df_frauen, "Beschäftigtenquote Frauen in Niederbayern (2003–2023)", "Beschäftigtenquote Frauen (%)", "plot_erwerbstaetige_frauen.png")
+    plot_lines_top_bottom(
+        df_frauen,
+        "Beschäftigte Frauen am Wohnort in Niederbayern (2003–2023)",
+        "Beschäftigte Frauen (je 100 Frauen im erwerbsfähigen Alter, %)",
+        "plot_erwerbstaetige_frauen.png",
+    )
+
 
 if __name__ == "__main__":
     main()
+
