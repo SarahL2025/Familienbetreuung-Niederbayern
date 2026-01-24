@@ -136,7 +136,7 @@ def main():
     df_betreuung = read_inkar_table(FILES["Kinderbetreuung"])
     plot_lines_top_bottom(
         df_betreuung,
-        "Betreuungsquote Kleinkinder in Niederbayern (2003–2023)",
+        "Betreuungsquote Kleinkinder in Niederbayern (2006–2023)",
         "Betreuungsquote Kleinkinder (Anteil U3 in Kindertageseinrichtungen, %)",
         "plot_kinderbetreuung.png",
     )
