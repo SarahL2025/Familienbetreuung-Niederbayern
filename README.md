@@ -22,7 +22,7 @@ Enthalten sind:
 ### Einwohner unter 6 Jahre in Niederbayern (2003–2023)
 ![Einwohner unter 6 Jahre](plot_kinder_0_6.png)
 
-### Betreuungsquote Kleinkinder in Niederbayern (2003–2023)
+### Betreuungsquote Kleinkinder in Niederbayern (2006–2023)
 ![Betreuungsquote Kleinkinder](plot_kinderbetreuung.png)
 
 ### Geborene in Niederbayern (2003–2023)
